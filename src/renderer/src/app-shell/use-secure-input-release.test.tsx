@@ -6,6 +6,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 vi.mock('@/lib/desktop-window-chrome', () => ({ isPairedWebClientWindow: () => false }))
 vi.mock('./app-window-chrome', () => ({ isMac: true }))
 
+const webviewRegistry = vi.hoisted(() => new Map<string, { executeJavaScript: unknown }>())
+vi.mock('@/components/browser-pane/host-guest/webview-registry', () => ({ webviewRegistry }))
+
 import { useSecureInputRelease } from './use-secure-input-release'
 
 describe('useSecureInputRelease', () => {
@@ -16,6 +19,7 @@ describe('useSecureInputRelease', () => {
     systemResumed = null
     unsubscribeSystemResumed.mockClear()
     document.body.replaceChildren()
+    webviewRegistry.clear()
     setVisibility('visible')
     ;(window as unknown as { api: unknown }).api = {
       ui: {
@@ -119,6 +123,69 @@ describe('useSecureInputRelease', () => {
     act(() => window.dispatchEvent(new Event('focus')))
 
     expect(document.activeElement).not.toBe(password)
+    view.unmount()
+  })
+  function registerGuest(id: string): ReturnType<typeof vi.fn> {
+    const executeJavaScript = vi.fn(() => Promise.resolve())
+    webviewRegistry.set(id, { executeJavaScript })
+    return executeJavaScript
+  }
+
+  it('releases a password focused inside a browser guest, which the host DOM cannot see', () => {
+    const guest = registerGuest('page-1')
+    // Focus inside a <webview> reads as the element itself, never the guest's input.
+    const webviewElement = document.createElement('div')
+    document.body.append(webviewElement)
+    const view = renderHook(() => useSecureInputRelease())
+
+    act(() => window.dispatchEvent(new Event('blur')))
+
+    expect(guest).toHaveBeenCalledTimes(1)
+    expect(guest.mock.calls[0][0]).toContain("type === 'password'")
+    expect(guest.mock.calls[0][0]).toContain('active.blur()')
+
+    act(() => window.dispatchEvent(new Event('focus')))
+    expect(guest).toHaveBeenCalledTimes(2)
+    expect(guest.mock.calls[1][0]).toContain('parked.focus()')
+
+    view.unmount()
+  })
+
+  it('reaches every registered guest on hide and on system resume', () => {
+    const first = registerGuest('page-1')
+    const second = registerGuest('page-2')
+    const view = renderHook(() => useSecureInputRelease())
+
+    setVisibility('hidden')
+    act(() => document.dispatchEvent(new Event('visibilitychange')))
+    expect(first).toHaveBeenCalledTimes(1)
+    expect(second).toHaveBeenCalledTimes(1)
+
+    act(() => systemResumed?.())
+    expect(first).toHaveBeenCalledTimes(2)
+    expect(second).toHaveBeenCalledTimes(2)
+
+    view.unmount()
+  })
+
+  it('keeps releasing other guests when one is mid-navigation or destroyed', () => {
+    const dead = vi.fn(() => {
+      throw new Error('guest is destroyed')
+    })
+    webviewRegistry.set('dead', { executeJavaScript: dead })
+    const rejecting = vi.fn(() => Promise.reject(new Error('navigating')))
+    webviewRegistry.set('rejecting', { executeJavaScript: rejecting })
+    const live = registerGuest('live')
+    const password = focusInput('password')
+    const view = renderHook(() => useSecureInputRelease())
+
+    expect(() => act(() => window.dispatchEvent(new Event('blur')))).not.toThrow()
+
+    expect(dead).toHaveBeenCalledTimes(1)
+    expect(rejecting).toHaveBeenCalledTimes(1)
+    expect(live).toHaveBeenCalledTimes(1)
+    expect(document.activeElement).not.toBe(password)
+
     view.unmount()
   })
 })

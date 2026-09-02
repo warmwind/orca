@@ -8,6 +8,7 @@ import {
   listCapableSharedControlSockets,
   startDesktopPresenceReporter
 } from '../notifications/desktop-presence-reporter'
+import { registerMacSecureInputRelease } from '../macos-secure-input-release'
 import { agentHookServer } from '../agent-hooks/server'
 import { installHookStatusSessionTabsRepublish } from '../agent-hooks/hook-status-session-tabs-republish'
 import { initTelemetry, track } from '../telemetry/client'
@@ -53,6 +54,7 @@ export function initializeMainProcessObservers(): void {
       }
     }
   })
+  state.unsubscribeMacSecureInputRelease = registerMacSecureInputRelease()
   state.agentAwakeService = new AgentAwakeService()
   state.agentAwakeService.setMode(
     normalizeComputerAwakeMode(

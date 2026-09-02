@@ -103,6 +103,8 @@ docs/**
 !docs/agents-md-refs/**
 !docs/agent-skill-sharing-implementation-checklist.md
 !docs/mobile-terminal-shortcut-bar.md
+!docs/reference/
+!docs/reference/macos-secure-input-latch.md
 
 .stably/*
 !.stably/docs/

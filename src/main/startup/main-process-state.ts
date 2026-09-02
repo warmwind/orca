@@ -111,6 +111,7 @@ export const mainProcessState = {
   unsubscribeSystemResumeBroadcast: null as (() => void) | null,
   // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: widens the null slot to the stop function assigned by main-process-observers.
   stopDesktopPresenceReporter: null as (() => void) | null,
+  unsubscribeMacSecureInputRelease: null as (() => void) | null,
   watcherShutdownPromise: null as Promise<void> | null,
   watcherShutdownDone: false,
   automations: null as AutomationService | null,

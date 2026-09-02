@@ -118,6 +118,8 @@ function installWillQuitHandler(): void {
     state.unsubscribeSystemResumeBroadcast = null
     state.stopDesktopPresenceReporter?.()
     state.stopDesktopPresenceReporter = null
+    state.unsubscribeMacSecureInputRelease?.()
+    state.unsubscribeMacSecureInputRelease = null
     // Keep log-stream diagnostics alive through renderer quit vetoes.
     stopTccPromptNotice()
     const updateQuitInProgress = isQuittingForUpdate()
