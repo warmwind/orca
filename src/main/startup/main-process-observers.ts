@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { AgentAwakeService } from '../agent-awake-service'
 import { normalizeComputerAwakeMode } from '../../shared/computer-awake-mode'
 import { registerSystemResumeBroadcast } from '../system-resume-broadcast'
+import { registerMacSecureInputRelease } from '../macos-secure-input-release'
 import { agentHookServer } from '../agent-hooks/server'
 import { installHookStatusSessionTabsRepublish } from '../agent-hooks/hook-status-session-tabs-republish'
 import { initTelemetry, track } from '../telemetry/client'
@@ -27,6 +28,7 @@ export function initializeMainProcessObservers(): void {
     throw new Error('Store must be initialized before observers')
   }
   state.unsubscribeSystemResumeBroadcast = registerSystemResumeBroadcast()
+  state.unsubscribeMacSecureInputRelease = registerMacSecureInputRelease()
   state.agentAwakeService = new AgentAwakeService()
   state.agentAwakeService.setMode(
     normalizeComputerAwakeMode(

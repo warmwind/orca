@@ -100,6 +100,7 @@ export const mainProcessState = {
   crashReports: null as CrashReportStore | null,
   unsubscribeAgentAwakeStatusChanges: null as (() => void) | null,
   unsubscribeSystemResumeBroadcast: null as (() => void) | null,
+  unsubscribeMacSecureInputRelease: null as (() => void) | null,
   watcherShutdownPromise: null as Promise<void> | null,
   watcherShutdownDone: false,
   automations: null as AutomationService | null,
