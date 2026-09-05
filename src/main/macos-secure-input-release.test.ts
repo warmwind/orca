@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from 'vitest'
 import { registerMacSecureInputRelease } from './macos-secure-input-release'
 
 vi.mock('electron', () => ({
-  app: { on: vi.fn(), off: vi.fn() },
+  app: {
+    on: vi.fn(),
+    off: vi.fn(),
+    isSecureKeyboardEntryEnabled: vi.fn(() => false),
+    setSecureKeyboardEntryEnabled: vi.fn()
+  },
   powerMonitor: { on: vi.fn(), off: vi.fn() },
   webContents: { getAllWebContents: vi.fn(() => []) }
 }))
@@ -22,6 +27,13 @@ function createEventSource<E extends string>() {
     })
   }
   return { source, emit: (event: E) => listeners.get(event)?.() }
+}
+
+function createSecureKeyboard(enabled = false) {
+  return {
+    isSecureKeyboardEntryEnabled: vi.fn(() => enabled),
+    setSecureKeyboardEntryEnabled: vi.fn()
+  }
 }
 
 type ExecuteJavaScript = (code: string, userGesture?: boolean) => Promise<unknown>
@@ -59,6 +71,8 @@ describe('registerMacSecureInputRelease', () => {
       platform: 'win32',
       appEvents: app.source,
       powerSource: suspend.source,
+      appSecureKeyboard: createSecureKeyboard(),
+      log: vi.fn(),
       getAllWebContents: () => []
     })
     expect(app.source.on).not.toHaveBeenCalled()
@@ -76,6 +90,8 @@ describe('registerMacSecureInputRelease', () => {
       platform: 'darwin',
       appEvents: app.source,
       powerSource: suspend.source,
+      appSecureKeyboard: createSecureKeyboard(),
+      log: vi.fn(),
       getAllWebContents: () => [createContents([frameA, frameB]), guest]
     })
 
@@ -95,6 +111,8 @@ describe('registerMacSecureInputRelease', () => {
       platform: 'darwin',
       appEvents: app.source,
       powerSource: power.source,
+      appSecureKeyboard: createSecureKeyboard(),
+      log: vi.fn(),
       getAllWebContents: () => [createContents([frame])]
     })
 
@@ -104,6 +122,66 @@ describe('registerMacSecureInputRelease', () => {
     // Resume matters: a field can be (re)focused on wake while Orca is not key.
     power.emit('resume')
     expect(frame.executeJavaScript).toHaveBeenCalledTimes(2)
+  })
+
+  it('drops the app-level secure-keyboard enabler when Electron holds it', () => {
+    const app = createEventSource<'did-resign-active'>()
+    const suspend = createEventSource<'suspend' | 'resume'>()
+    const keyboard = createSecureKeyboard(true)
+    registerMacSecureInputRelease({
+      platform: 'darwin',
+      appEvents: app.source,
+      powerSource: suspend.source,
+      appSecureKeyboard: keyboard,
+      log: vi.fn(),
+      getAllWebContents: () => []
+    })
+
+    app.emit('did-resign-active')
+
+    expect(keyboard.isSecureKeyboardEntryEnabled).toHaveBeenCalled()
+    expect(keyboard.setSecureKeyboardEntryEnabled).toHaveBeenCalledWith(false)
+  })
+
+  it('never touches app-level secure keyboard when Electron does not hold it', () => {
+    const app = createEventSource<'did-resign-active'>()
+    const suspend = createEventSource<'suspend' | 'resume'>()
+    const keyboard = createSecureKeyboard(false)
+    registerMacSecureInputRelease({
+      platform: 'darwin',
+      appEvents: app.source,
+      powerSource: suspend.source,
+      appSecureKeyboard: keyboard,
+      log: vi.fn(),
+      getAllWebContents: () => []
+    })
+
+    app.emit('did-resign-active')
+
+    expect(keyboard.setSecureKeyboardEntryEnabled).not.toHaveBeenCalled()
+  })
+
+  it('logs the diagnostic (trigger, app-level state, counts) on every trigger', () => {
+    const app = createEventSource<'did-resign-active'>()
+    const power = createEventSource<'suspend' | 'resume'>()
+    const log = vi.fn()
+    registerMacSecureInputRelease({
+      platform: 'darwin',
+      appEvents: app.source,
+      powerSource: power.source,
+      appSecureKeyboard: createSecureKeyboard(true),
+      log,
+      getAllWebContents: () => [createContents([createFrame(), createFrame()])]
+    })
+
+    app.emit('did-resign-active')
+
+    expect(log).toHaveBeenCalledWith('release', {
+      trigger: 'did-resign-active',
+      appLevelSecureKeyboardWasEnabled: true,
+      webContentsCount: 1,
+      framesDispatched: 2
+    })
   })
 
   it('skips destroyed contents and destroyed frames, and survives a throwing frame', () => {
@@ -118,6 +196,8 @@ describe('registerMacSecureInputRelease', () => {
       platform: 'darwin',
       appEvents: app.source,
       powerSource: suspend.source,
+      appSecureKeyboard: createSecureKeyboard(),
+      log: vi.fn(),
       getAllWebContents: () => [
         destroyedContents,
         // A live main frame with a destroyed, a rejecting, and a live subframe.
@@ -142,6 +222,8 @@ describe('registerMacSecureInputRelease', () => {
       platform: 'darwin',
       appEvents: app.source,
       powerSource: power.source,
+      appSecureKeyboard: createSecureKeyboard(),
+      log: vi.fn(),
       getAllWebContents: () => [createContents([frame])]
     })
 

@@ -53,6 +53,22 @@ The login field is frequently inside a **cross-origin iframe** (OAuth/SSO), whic
 for the fix: the host page's `document.activeElement` is the `<iframe>` element, not the
 password input, so a main-frame-only blur misses it.
 
+## Field evidence: an orphaned browser-process enabler (2026-09)
+
+A live-latch experiment refined the model. On a latched Orca (IORegistry owner = the Orca
+browser PID), killing the **only** renderer process (`kill -9`) did **not** release Secure
+Event Input: at the instant there were zero live renderers, the owner PID was still the
+browser process, and it stayed latched while a replacement renderer was spawned and across
+many app-focus changes. A read-only monitor confirmed the owner never changed.
+
+This proves at least one failure mode is an enabler **orphaned in the browser process**,
+not tied to any live WebContents / RWHV. Destroying every renderer — the strongest form of
+release path 3 above — did not clear it, and there was no live focused password field to
+blur (release path 1). So a DOM-blur sweep alone cannot recover this state; the lever has
+to act in the browser (main) process. Two candidates: Electron's own app-level enabler
+(clearable via `setSecureKeyboardEntryEnabled(false)`), or a leaked RWHV enabler (only a
+native `DisableSecureEventInput()` reaches it). The diagnostic below distinguishes them.
+
 ## The fix
 
 The only lever that releases the OS latch **through Chromium's own counter** (so the count
@@ -68,25 +84,43 @@ Two layers, both macOS-only and behind platform guards:
   on window blur / document hidden / system resume / `beforeunload`. Covers the common
   visible cases and the teardown timing that the main process cannot observe.
 - **Main process** (`src/main/macos-secure-input-release.ts`): the authoritative backstop.
-  On `app.on('did-resign-active')` and `powerMonitor` `suspend`/`resume`, it sweeps **every**
-  WebContents (`webContents.getAllWebContents()`) and **every frame**
-  (`mainFrame.framesInSubtree`), blurring a focused password input in each. This reaches
-  retained client-hosted guests, offscreen windows, artifact/doc previews, and cross-origin
-  login iframes — none of which the renderer's `webviewRegistry` walk can see.
+  On `app.on('did-resign-active')` and `powerMonitor` `suspend`/`resume`, it runs two
+  counter-synced levers:
+  1. **Blur sweep** — walks **every** WebContents (`webContents.getAllWebContents()`) and
+     **every frame** (`mainFrame.framesInSubtree`), blurring a focused password input in
+     each. This reaches retained client-hosted guests, offscreen windows, artifact/doc
+     previews, and cross-origin login iframes — none of which the renderer's
+     `webviewRegistry` walk can see.
+  2. **App-level release** — if `app.isSecureKeyboardEntryEnabled()` is true, calls
+     `app.setSecureKeyboardEntryEnabled(false)` to drop Electron's own
+     `Browser::password_input_enabler_`. Counter-synced (goes through Electron's
+     `ScopedPasswordInputEnabler` destructor, **not** the raw `DisableSecureEventInput`),
+     and a no-op when Electron never took it — which is always, in current Orca, since Orca
+     never calls the `true` side.
+
+  Each trigger appends a diagnostic line to
+  `~/Library/Application Support/Orca/logs/secure-input-release.log`
+  (`trigger`, `appLevelSecureKeyboardWasEnabled`, `webContentsCount`, `framesDispatched`).
+  The desktop app is launched detached (`open -a Orca`), so console output is lost; the file
+  is the retrievable record. Cross-referencing `appLevelSecureKeyboardWasEnabled=false`
+  against an IORegistry owner that is still Orca is the decisive proof that a stuck latch is
+  a leaked **RWHV** enabler (lever 2 cannot reach it) rather than Electron's app-level one.
 
 The blur script only touches a focused `<input type=password>`, so it is a no-op in every
 other frame and safe to broadcast on deactivation. Automation is unaffected: the CDP
 `fill`/`type` path re-issues `DOM.focus` before typing, so a blurred field is re-focused on
 the next agent keystroke, and blur never clears an already-typed value.
 
-## Why not call DisableSecureEventInput directly (Goal C)
+## App-level release vs. the raw OS call (Goal C)
 
-`app.setSecureKeyboardEntryEnabled(false)` only resets **Electron's own**
-`Browser::password_input_enabler_` (`shell/browser/browser_mac.mm`); it cannot touch an
-enabler a RenderWidgetHostViewMac created. Reaching the OS API directly would need a native
-addon calling `DisableSecureEventInput()`.
+`app.setSecureKeyboardEntryEnabled(false)` resets **Electron's own**
+`Browser::password_input_enabler_` (`shell/browser/browser_mac.mm`) through the same
+`ScopedPasswordInputEnabler` destructor Chromium uses, so it stays in lockstep with
+`g_password_input_counter`. That is why it is safe to run as lever 2 on every deactivation.
+Its limit: it **cannot** touch an enabler a RenderWidgetHostViewMac created. Reaching that
+would need a native addon calling the raw `DisableSecureEventInput()`.
 
-Rejected as the primary fix:
+The raw OS call is rejected as the primary fix:
 
 - **Desync risk.** `DisableSecureEventInput()` decrements the OS-level per-process count
   without touching Chromium's `g_password_input_counter`. Blindly decrementing leaves
