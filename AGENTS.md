@@ -32,6 +32,11 @@ All UI work — layout, color, typography, spacing, component selection, UX beha
 - Use the `$electron` skill and Playwright CDP for rendered Orca UI checks. Do not use computer-use for Orca UI validation.
 - Screenshot presentational components without Electron: `pnpm fixtures:shot <id>` ([fixtures](docs/agents-md-refs/component-fixtures.md)).
 
+# Browser Defaults
+
+- For agent-driven web browsing and web-app testing, prefer Orca's embedded browser via `$orca-cli`. Use the system browser when the user requests it or the task requires it. Rendered Orca UI checks still follow the Electron UI Validation rules above.
+- Product links continue to open in the system browser by default, respecting the user's Link Routing setting. Agent browser preference is independent of product link routing.
+
 # Code Style
 
 ## Reuse Before Reimplementing
