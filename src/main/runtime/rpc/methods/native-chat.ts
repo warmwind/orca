@@ -4,7 +4,7 @@ import {
   subscribeNativeChatTranscript,
   type NativeChatTranscriptSubscription,
   type SubscribeNativeChatTranscriptArgs
-} from '../../../native-chat/transcript-watch'
+} from '../../../native-chat/ssh-aware-transcript-watch'
 import { defineMethod, defineStreamingMethod, type RpcContext } from '../core'
 import { sanitizeNativeChatRpcBlock } from './native-chat-rpc-block-sanitize'
 import {
