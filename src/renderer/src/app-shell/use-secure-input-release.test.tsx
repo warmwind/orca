@@ -21,14 +21,18 @@ describe('useSecureInputRelease', () => {
     document.body.replaceChildren()
     webviewRegistry.clear()
     setVisibility('visible')
-    ;(window as unknown as { api: unknown }).api = {
-      ui: {
-        onSystemResumed: vi.fn((callback: () => void) => {
-          systemResumed = callback
-          return unsubscribeSystemResumed
-        })
+    Object.defineProperty(window, 'api', {
+      configurable: true,
+      writable: true,
+      value: {
+        ui: {
+          onSystemResumed: vi.fn((callback: () => void) => {
+            systemResumed = callback
+            return unsubscribeSystemResumed
+          })
+        }
       }
-    }
+    })
   })
 
   afterEach(() => {
