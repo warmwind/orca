@@ -167,7 +167,7 @@ export function registerMacSecureInputRelease(
   const log = options.log ?? defaultLog
   const getAllWebContents =
     options.getAllWebContents ??
-    (() => webContents.getAllWebContents() as unknown as SecureInputReleaseWebContents[])
+    ((): SecureInputReleaseWebContents[] => webContents.getAllWebContents())
 
   const sweep = (trigger: string): void => {
     // Lever 2 first: drop Electron's app-level enabler if it holds one. Counter-synced, so
