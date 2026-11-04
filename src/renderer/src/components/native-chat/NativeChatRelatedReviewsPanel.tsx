@@ -83,7 +83,7 @@ export function NativeChatRelatedReviewsPanel(props: {
             onClick={props.onRefresh}
             disabled={props.loadingHistory}
           >
-            {translate('common.refresh', 'Refresh')}
+            {translate('auto.components.right.sidebar.ChecksPanel.7f4489f370', 'Refresh')}
           </Button>
         ) : null}
       </div>
@@ -105,7 +105,7 @@ export function NativeChatRelatedReviewsPanel(props: {
               >
                 <div className="flex flex-wrap items-center gap-1.5 text-muted-foreground">
                   {row.review ? (
-                    <ReviewStateBadge state={row.review.state} label="PR" prominent />
+                    <ReviewStateBadge state={row.review.state} reviewKind="PR" prominent />
                   ) : null}
                   <span className="min-w-0 break-all">{label}</span>
                   <span className="text-2xs text-muted-foreground">

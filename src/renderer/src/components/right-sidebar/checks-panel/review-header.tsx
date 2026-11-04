@@ -76,7 +76,7 @@ export function ChecksPanelReviewHeader({
       </button>
       <ReviewStateBadge
         state={review.state}
-        label={review.provider === 'gitlab' ? 'MR' : 'PR'}
+        reviewKind={review.provider === 'gitlab' ? 'MR' : 'PR'}
         prominent
       />
       <div className="flex-1" />

@@ -1,6 +1,6 @@
 import type { AgentJournalToolCallItem } from './agent-session/journal/agent-session-journal-types'
 import { normalizeToolInput } from './native-chat/tools/native-chat-tool-summary'
-import { parseWorkspaceReferenceUrl } from './workspace-reference-identity'
+import { parseWorkspaceReferenceUrl } from './workspace-attachments/workspace-reference-identity'
 
 export type ConversationQunliCardLinks = Record<string, string[]>
 

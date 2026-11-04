@@ -5,7 +5,7 @@ import {
   conversationReviewUrls as reviewUrls,
   readConversationReviewOutput
 } from './conversation-review-output'
-import { parseWorkspaceReferenceUrl } from './workspace-reference-identity'
+import { parseWorkspaceReferenceUrl } from './workspace-attachments/workspace-reference-identity'
 import { isRuntimePathAbsolute } from './cross-platform-path'
 import {
   conversationReviewCreationReceipts,

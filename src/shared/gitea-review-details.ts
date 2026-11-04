@@ -1,4 +1,4 @@
-import type { HostedReviewInfo } from './hosted-review'
+import type { HostedReviewInfo } from './source-control/hosted-review/hosted-review-contracts'
 import type { PRComment } from './github/comment-types'
 import type { PRCheckDetail } from './github/check-types'
 

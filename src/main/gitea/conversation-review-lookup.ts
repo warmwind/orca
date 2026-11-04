@@ -9,8 +9,8 @@ import {
   type RawGiteaPullRequest
 } from './pull-request-mappers'
 import type { ConversationReviewLookup } from '../../shared/conversation-review-mutations'
-import type { HostedReviewInfo } from '../../shared/hosted-review'
-import { parseWorkspaceReferenceUrl } from '../../shared/workspace-reference-identity'
+import type { HostedReviewInfo } from '../../shared/source-control/hosted-review/hosted-review-contracts'
+import { parseWorkspaceReferenceUrl } from '../../shared/workspace-attachments/workspace-reference-identity'
 
 const PULL_REQUEST_LIST_TIMEOUT_MS = 15_000
 const PULL_REQUEST_PAGE_LIMIT = 50

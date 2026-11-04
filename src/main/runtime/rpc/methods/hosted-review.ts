@@ -5,7 +5,7 @@ import {
   readGiteaReviewDetailsForRepo,
   readGiteaReviewDetailsForUrl
 } from '../../../gitea/review-details'
-import { supportsHostedReviewCreation } from '../../../../shared/hosted-review-creation-providers'
+import { supportsHostedReviewCreation } from '../../../../shared/source-control/hosted-review/hosted-review-creation-providers'
 import { UNSUPPORTED_HOSTED_REVIEW_PROVIDER } from '../../../source-control/hosted-review-creation'
 import {
   HostedReviewCreate,

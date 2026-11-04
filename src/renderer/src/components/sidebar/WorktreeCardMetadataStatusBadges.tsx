@@ -1,4 +1,4 @@
-import { getProviderChecksOutcome } from '../../../../shared/provider-check-summary'
+import { getProviderChecksOutcome } from '../../../../shared/source-control/checks/provider-check-summary'
 import React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getReviewChecksTone } from './worktree-review-helpers'
@@ -34,11 +34,11 @@ function MetadataStatusBadge({
 
 export function ReviewStateBadge({
   state,
-  label,
+  reviewKind,
   prominent = false
 }: {
   state: WorktreeCardPrDisplay['state']
-  label: 'MR' | 'PR'
+  reviewKind: 'MR' | 'PR'
   prominent?: boolean
 }): React.JSX.Element | null {
   if (!state) {
@@ -48,7 +48,7 @@ export function ReviewStateBadge({
     return (
       <Badge
         variant="reviewState"
-        aria-label={reviewStateLabel(state, label)}
+        aria-label={reviewStateLabel(state, reviewKind)}
         data-review-state={state}
       >
         {state}
@@ -59,7 +59,7 @@ export function ReviewStateBadge({
   if (state === 'merged') {
     return (
       <MetadataStatusBadge
-        label={reviewStateLabel(state, label)}
+        label={reviewStateLabel(state, reviewKind)}
         className="border-purple-500/25 bg-purple-500/5 text-purple-600 dark:text-purple-300"
       >
         <GitMerge />
@@ -70,7 +70,7 @@ export function ReviewStateBadge({
   if (state === 'closed') {
     return (
       <MetadataStatusBadge
-        label={reviewStateLabel(state, label)}
+        label={reviewStateLabel(state, reviewKind)}
         className="border-rose-500/25 bg-rose-500/5 text-rose-600 dark:text-rose-300"
       >
         <CircleX />
@@ -81,7 +81,7 @@ export function ReviewStateBadge({
   if (state === 'draft') {
     return (
       <MetadataStatusBadge
-        label={reviewStateLabel(state, label)}
+        label={reviewStateLabel(state, reviewKind)}
         className="border-border bg-muted/30 text-muted-foreground"
       >
         <CircleDot />
@@ -91,10 +91,10 @@ export function ReviewStateBadge({
 
   return (
     <MetadataStatusBadge
-      label={reviewStateLabel(state, label)}
+      label={reviewStateLabel(state, reviewKind)}
       className="border-emerald-500/25 bg-emerald-500/5 text-emerald-600 dark:text-emerald-300"
     >
-      {label === 'MR' ? <GitMerge /> : <PullRequestIcon />}
+      {reviewKind === 'MR' ? <GitMerge /> : <PullRequestIcon />}
     </MetadataStatusBadge>
   )
 }

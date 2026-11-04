@@ -1,6 +1,6 @@
 import { getAuthConfig } from './client'
 import { parseGiteaRepoRef } from './repository-ref'
-import { parseWorkspaceReferenceUrl } from '../../shared/workspace-reference-identity'
+import { parseWorkspaceReferenceUrl } from '../../shared/workspace-attachments/workspace-reference-identity'
 
 export function trustedGiteaWebBases(trustedRemotes: readonly string[]): string[] {
   const configured = getAuthConfig().apiBaseUrl

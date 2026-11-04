@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AgentJournalRenderItem } from '../../../../shared/agent-session/journal/agent-session-journal-types'
 import type { AgentSessionHistoryResult } from '../../../../shared/agent-session/agent-session-wire'
 import type { RuntimeClientTarget } from '../../../../shared/runtime-client-target'
-import type { HostedReviewInfo } from '../../../../shared/hosted-review'
+import type { HostedReviewInfo } from '../../../../shared/source-control/hosted-review/hosted-review-contracts'
 import { PrioritySemaphore } from '../../../../shared/priority-semaphore'
 import { callRuntimeRpc } from '@/runtime/runtime-rpc-client'
 import {

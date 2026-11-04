@@ -13,7 +13,7 @@ import type {
   HostedReviewForBranchArgs,
   HostedReviewForBranchReply,
   HostedReviewInfo
-} from '../../shared/hosted-review'
+} from '../../shared/source-control/hosted-review/hosted-review-contracts'
 import type { GiteaReviewDetails, GiteaReviewDetailsArgs } from '../../shared/gitea-review-details'
 
 export type HostedReviewApi = {

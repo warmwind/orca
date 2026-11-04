@@ -1,5 +1,5 @@
 import { stripAnsiEscapeSequences } from './ansi-escape-sequences'
-import { parseWorkspaceReferenceUrl } from './workspace-reference-identity'
+import { parseWorkspaceReferenceUrl } from './workspace-attachments/workspace-reference-identity'
 
 export function conversationReviewUrls(text: string): string[] {
   return [
