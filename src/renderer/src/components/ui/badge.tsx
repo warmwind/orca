@@ -16,6 +16,8 @@ const badgeVariants = cva(
           'bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90',
         outline:
           'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+        reviewState:
+          'rounded font-semibold uppercase tracking-wide data-[review-state=open]:border-status-success-border data-[review-state=open]:bg-status-success-background data-[review-state=open]:text-status-success data-[review-state=merged]:border-callout-important/20 data-[review-state=merged]:bg-callout-important/15 data-[review-state=merged]:text-callout-important data-[review-state=closed]:border-destructive/20 data-[review-state=closed]:bg-destructive/10 data-[review-state=closed]:text-destructive data-[review-state=draft]:border-border data-[review-state=draft]:bg-muted data-[review-state=draft]:text-muted-foreground',
         ghost: '[a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 [a&]:hover:underline',
         /** Workspace execution-host context, quieter and squarer than status chips. */

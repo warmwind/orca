@@ -19351,6 +19351,23 @@
         "hostUnavailable": "附件所在主机不可用。请重新连接后重试。",
         "connectionChanged": "连接已更改。请关闭并重新打开此附件。",
         "readFailed": "无法在主机上读取此附件。请重新连接后重试。文件可能已被删除或更改。"
+      },
+      "relatedReviews": {
+        "details": "查看详情",
+        "detailsFor": "查看 {{title}} 的详情",
+        "title": "本会话创建或修改的 PR",
+        "created": "已创建",
+        "updated": "已修改",
+        "loading": "正在读取 PR 状态…",
+        "checks": "检查：{{status}}",
+        "unavailable": "暂时无法读取 PR 状态，请检查托管服务连接后刷新。",
+        "reading": "正在读取较早的 PR 操作…",
+        "partial": "未能读取完整会话记录，请刷新重试。",
+        "empty": "尚未在本会话中检测到 PR 创建或修改操作。",
+        "unknown": "暂不可用",
+        "noChecks": "无检查",
+        "lookupError": "部分操作未能确认关联 PR，请检查托管服务连接后刷新。",
+        "open": "打开 PR"
       }
     },
     "tab": {
@@ -22933,5 +22950,27 @@
   "wslDistroHold": {
     "terminalStopped": "WSL 发行版 {{distro}} 已停止，因此 Orca 没有启动此终端。请启动该发行版后重试。",
     "terminalUnverifiable": "Orca 无法确认 WSL 发行版 {{distro}} 是否正在运行，因此没有启动此终端。请启动该发行版后重试。"
+  },
+  "gitea": {
+    "review": {
+      "qunliCards": "qunli 卡片",
+      "qunliCard": "打开卡片",
+      "commentsUnavailable": "部分 Gitea 评论加载失败，请刷新重试。",
+      "description": "描述",
+      "loadFailed": "无法在当前环境加载 Gitea 评审详情。",
+      "truncated": "此 PR 的评审历史超出显示上限，请在 Gitea 查看完整记录。",
+      "checksUnavailable": "Gitea 检查结果加载失败。",
+      "reviews": "评审",
+      "reviewsUnavailable": "Gitea 评审记录加载失败，请刷新重试。",
+      "dismissed": "已撤销",
+      "stale": "已过时",
+      "openReview": "在 Gitea 查看评审",
+      "noReviews": "暂无评审记录。",
+      "approved": "已批准",
+      "changesRequested": "请求修改",
+      "commented": "已评论",
+      "pending": "待提交",
+      "requested": "已请求评审"
+    }
   }
 }

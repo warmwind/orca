@@ -14,8 +14,10 @@ import type {
   HostedReviewForBranchReply,
   HostedReviewInfo
 } from '../../shared/hosted-review'
+import type { GiteaReviewDetails, GiteaReviewDetailsArgs } from '../../shared/gitea-review-details'
 
 export type HostedReviewApi = {
+  giteaDetails: (args: GiteaReviewDetailsArgs) => Promise<GiteaReviewDetails>
   forBranch: {
     (
       args: HostedReviewForBranchArgs & { reportReadOutcome?: false }

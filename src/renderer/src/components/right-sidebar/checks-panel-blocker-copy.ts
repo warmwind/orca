@@ -174,6 +174,9 @@ export function branchBlockerState(
     ...(canOpenReview ? (['open_review'] as ChecksPanelRecoveryAction[]) : []),
     ...(detail ? (['retry'] as ChecksPanelRecoveryAction[]) : [])
   ]
+  if (reason === 'auth_required' && !lookupRecovery.includes('retry')) {
+    lookupRecovery.push('retry')
+  }
   const openReviewUrl = canOpenReview ? input.openReviewUrl : undefined
   const vars = { reviewLabel, provider: providerName }
 

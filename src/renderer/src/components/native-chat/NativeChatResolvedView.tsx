@@ -58,22 +58,24 @@ import { useNativeChatLocalCommandAnswer } from './use-native-chat-local-command
 import { useNativeChatImageRuntimeContext } from './native-chat-image-runtime-context'
 import { handleNativeChatSplitShortcut } from './native-chat-split-shortcut'
 import { formatShortcutLabel } from '@/hooks/useShortcutLabel'
+import { NativeChatTranscriptReviews } from './NativeChatConversationReviews'
 
-export function NativeChatResolvedView({
-  paneKey,
-  agent,
-  sessionId,
-  transcriptPath,
-  isVisible,
-  isFocusedGroup,
-  targetPtyId,
-  terminalTabId,
-  ownsTabWideLaunchDraft,
-  onSwitchToTerminal,
-  readTerminalScreen,
-  readTerminalDraft,
-  contextMenuActions
-}: NativeChatResolvedViewProps): React.JSX.Element {
+export function NativeChatResolvedView(props: NativeChatResolvedViewProps): React.JSX.Element {
+  const {
+    paneKey,
+    agent,
+    sessionId,
+    transcriptPath,
+    isVisible,
+    isFocusedGroup,
+    targetPtyId,
+    terminalTabId,
+    ownsTabWideLaunchDraft,
+    onSwitchToTerminal,
+    readTerminalScreen,
+    readTerminalDraft,
+    contextMenuActions
+  } = props
   // Route reads/subscriptions through the pane’s runtime owner; null retains local routing.
   const selectOwner = useMemo(() => createNativeChatRuntimeSelector(terminalTabId), [terminalTabId])
   const runtimeEnvironmentId = useAppStore(selectOwner)
@@ -350,6 +352,7 @@ export function NativeChatResolvedView({
           />
         }
       >
+        <NativeChatTranscriptReviews pane={props} messages={session.messages} />
         {find.isOpen ? <NativeChatFindBar find={find} isVisible={isVisible} /> : null}
         {viewState.kind === 'loading' ? (
           <NativeChatEmptyState kind="loading" />
@@ -398,11 +401,7 @@ export function NativeChatResolvedView({
           ref={shownPromptCard ? undefined : composerRef}
           inputOwnedByCard={shownPromptCard !== null}
           terminalTabId={terminalTabId}
-          paneKey={paneKey}
-          targetPtyId={targetPtyId}
-          agent={agent}
-          canSend={canSend}
-          isWorking={isWorking}
+          {...{ paneKey, targetPtyId, agent, canSend, isWorking }}
           onStop={stopAgent}
           onOptimisticSend={onOptimisticSend}
           onOptimisticSendCanceled={delivery.cancel}

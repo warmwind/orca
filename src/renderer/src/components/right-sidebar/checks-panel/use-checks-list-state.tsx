@@ -17,6 +17,7 @@ import {
 } from './check-details-model'
 
 export type ChecksListProps = {
+  fullDetailsSupported?: boolean
   checks: PRCheckDetail[]
   /** A GitLab parent pipeline: shown as its provider link above the job rows, never as a job. */
   pipelineCheck?: PRCheckDetail | null
@@ -37,7 +38,8 @@ export function useChecksListState({
   onLoadCheckDetails,
   worktreeId: worktreeIdOverride,
   getGitLabProjectRef,
-  githubRepository
+  githubRepository,
+  fullDetailsSupported = true
 }: ChecksListProps) {
   const activeWorktree = useActiveWorktree()
   const resolvedWorktreeId = worktreeIdOverride ?? activeWorktree?.id ?? null
@@ -134,6 +136,7 @@ export function useChecksListState({
         return
       }
       if (
+        fullDetailsSupported &&
         !row.check.checkRunId &&
         !row.check.workflowRunId &&
         !row.check.url &&
@@ -269,6 +272,7 @@ export function useChecksListState({
     [
       checkDetailsContextKey,
       detailsByCheckKey,
+      fullDetailsSupported,
       getGitLabProjectRef,
       githubRepository,
       onLoadCheckDetails,

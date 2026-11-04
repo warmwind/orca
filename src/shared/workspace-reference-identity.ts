@@ -130,6 +130,10 @@ function parseReferenceRoute(
   ) {
     return numberedReference(url, 'bitbucket', 'pr', `${bitbucket[1]}/pull-requests`, bitbucket[2])
   }
+  const gitea = /^(\/(?:[^/]+\/)+[^/]+)\/pulls\/(\d+)(?:\/.*)?$/.exec(url.pathname)
+  if (gitea) {
+    return numberedReference(url, 'gitea', 'pr', `${gitea[1]}/pulls`, gitea[2])
+  }
   const git = /^(\/[^/]+\/[^/]+)\/(pull|pulls|issues)\/(\d+)(?:\/.*)?$/.exec(url.pathname)
   if (git && url.hostname !== 'linear.app' && url.hostname !== 'gitlab.com') {
     const provider =

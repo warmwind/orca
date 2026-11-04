@@ -51,7 +51,7 @@ export function normalizeGiteaApiBaseUrl(value: string): string {
   return /\/api\/v1$/i.test(trimmed) ? trimmed : `${trimmed}/api/v1`
 }
 
-function getAuthConfig(): GiteaAuthConfig {
+export function getAuthConfig(): GiteaAuthConfig {
   const apiBaseUrl = envValue('ORCA_GITEA_API_BASE_URL')
   return {
     apiBaseUrl: apiBaseUrl ? normalizeGiteaApiBaseUrl(apiBaseUrl) : null,
@@ -87,6 +87,7 @@ async function requestJsonAtBase<T>(
   const config = getAuthConfig()
   try {
     const response = await fetch(apiUrl(baseUrl, path, options.searchParams), {
+      redirect: 'error',
       headers: {
         Accept: 'application/json',
         ...authHeaders(config)
@@ -110,7 +111,7 @@ async function requestJsonAtBase<T>(
   }
 }
 
-function requestJson<T>(
+export function requestJson<T>(
   repo: GiteaRepoRef,
   path: string,
   options: RequestOptions = {},
@@ -119,11 +120,11 @@ function requestJson<T>(
   return requestJsonAtBase(configuredApiBaseUrl(repo), path, options, throwOnFailure)
 }
 
-function encodedRepoPath(repo: GiteaRepoRef): string {
+export function encodedRepoPath(repo: GiteaRepoRef): string {
   return `${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.repo)}`
 }
 
-function giteaPullRequestScanKey(repo: GiteaRepoRef): string {
+export function giteaPullRequestScanKey(repo: GiteaRepoRef): string {
   return `${configuredApiBaseUrl(repo)}/${encodedRepoPath(repo)}`
 }
 
@@ -156,7 +157,7 @@ async function normalizePullRequest(
   return mapGiteaPullRequest(raw, status)
 }
 
-function matchesBranch(raw: RawGiteaPullRequest, branchName: string): boolean {
+export function matchesBranch(raw: RawGiteaPullRequest, branchName: string): boolean {
   const ref = raw.head?.ref?.trim()
   if (ref === branchName) {
     return true

@@ -366,6 +366,8 @@ import {
   WorkItemsList as WorkItemsListOfGitlabParams
 } from './gitlab-params'
 import {
+  GiteaReviewDetails,
+  HostedReviewConversationLookup,
   HostedReviewCreate,
   HostedReviewCreationEligibility,
   HostedReviewForBranch
@@ -1164,10 +1166,12 @@ export const RPC_PARAMS_BY_METHOD = {
   'host.pwsh.isAvailable': null,
   'host.wsl.isAvailable': null,
   'host.wsl.listDistros': null,
+  'hostedReview.conversationLookup': HostedReviewConversationLookup,
   'hostedReview.create': HostedReviewCreate,
   'hostedReview.createStacked': HostedReviewCreate,
   'hostedReview.forBranch': HostedReviewForBranch,
   'hostedReview.getCreationEligibility': HostedReviewCreationEligibility,
+  'hostedReview.giteaDetails': GiteaReviewDetails,
   'jira.addIssueComment': IssueCommentOfJiraParams,
   'jira.attachmentImage': AttachmentImage,
   'jira.cancelGenerateIssueSummary': CancelGenerateIssueSummary,

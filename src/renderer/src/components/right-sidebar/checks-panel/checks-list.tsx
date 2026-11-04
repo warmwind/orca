@@ -30,7 +30,8 @@ export function ChecksList(props: ChecksListProps): React.JSX.Element {
     checkDetailsContextKey,
     detailsStickySurface = 'sidebar',
     getGitLabProjectRef,
-    githubRepository
+    githubRepository,
+    fullDetailsSupported = true
   } = props
   const {
     resolvedWorktreeId,
@@ -216,6 +217,7 @@ export function ChecksList(props: ChecksListProps): React.JSX.Element {
                       detailsStickySurface={detailsStickySurface}
                       getGitLabProjectRef={getGitLabProjectRef}
                       githubRepository={githubRepository}
+                      fullDetailsSupported={fullDetailsSupported}
                       onRetry={() => requestCheckDetails(row)}
                     />
                   )}

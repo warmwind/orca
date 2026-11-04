@@ -2,6 +2,22 @@ import { z } from 'zod'
 import { OptionalBoolean, requiredString } from './rpc-param-primitives'
 import { OptionalGitAdmissionTier } from './git-admission-tier-params'
 
+export const GiteaReviewDetails = z.union([
+  z.object({ repo: requiredString('Missing repo selector'), number: z.number().int().positive() }),
+  z.object({ url: z.string().url().max(2048) })
+])
+
+export const HostedReviewConversationLookup = z.union([
+  z.object({ directory: z.string().min(1).max(4096), number: z.number().int().positive() }),
+  z.object({ url: z.string().url().max(2048) }),
+  z.object({
+    remoteUrl: z.string().min(1).max(2048),
+    branch: z.string().min(1).max(512),
+    headSha: z.string().regex(/^[\da-f]{7,64}$/)
+  }),
+  z.object({ repository: z.string().min(1).max(512), number: z.number().int().positive() })
+])
+
 export const HostedReviewForBranch = z.object({
   repo: requiredString('Missing repo selector'),
   branch: requiredString('Missing branch'),

@@ -34,13 +34,26 @@ function MetadataStatusBadge({
 
 export function ReviewStateBadge({
   state,
-  label
+  label,
+  prominent = false
 }: {
   state: WorktreeCardPrDisplay['state']
   label: 'MR' | 'PR'
+  prominent?: boolean
 }): React.JSX.Element | null {
   if (!state) {
     return null
+  }
+  if (prominent) {
+    return (
+      <Badge
+        variant="reviewState"
+        aria-label={reviewStateLabel(state, label)}
+        data-review-state={state}
+      >
+        {state}
+      </Badge>
+    )
   }
 
   if (state === 'merged') {

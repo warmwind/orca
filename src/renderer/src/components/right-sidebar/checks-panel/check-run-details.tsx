@@ -45,6 +45,7 @@ export function CheckRunDetails({
   detailsStickySurface = 'sidebar',
   getGitLabProjectRef,
   githubRepository,
+  fullDetailsSupported = true,
   onRetry
 }: {
   check: PRCheckDetail
@@ -55,6 +56,7 @@ export function CheckRunDetails({
   /** Read the asynchronously filled ref on demand; a render-time value can be stale. */
   getGitLabProjectRef?: () => GitLabProjectRef | null
   githubRepository?: GitHubRepositoryIdentity | null
+  fullDetailsSupported?: boolean
   onRetry: () => void
 }): React.JSX.Element {
   const openCheckRunDetails = useAppStore((s) => s.openCheckRunDetails)
@@ -98,7 +100,7 @@ export function CheckRunDetails({
 
   return (
     <div className="mb-1 ml-[26px] mr-3 min-w-0 border-l border-border pl-3">
-      {worktreeId && (
+      {worktreeId && fullDetailsSupported && (
         // Keep the action reachable while scrolling long annotations and output.
         <div
           className={cn(

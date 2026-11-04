@@ -1,4 +1,6 @@
 import { ipcMain } from 'electron'
+import type { GiteaReviewDetailsArgs } from '../../../shared/gitea-review-details'
+import { readGiteaReviewDetailsForRepo } from '../../gitea/review-details'
 import { posix, resolve } from 'node:path'
 
 import type { Repo } from '../../../shared/repo-types'
@@ -111,6 +113,10 @@ function normalizeRemoteHostedReviewPath(remotePath: string): string {
 }
 
 export function registerHostedReviewHandlers(store: Store, stats: StatsCollector): void {
+  ipcMain.handle('hostedReview:giteaDetails', async (_event, args: GiteaReviewDetailsArgs) => {
+    const repo = assertRegisteredRepoForBranch(args, store)
+    return readGiteaReviewDetailsForRepo(repo, args.number)
+  })
   ipcMain.handle('hostedReview:forBranch', async (_event, args: HostedReviewForBranchArgs) => {
     const repo = assertRegisteredRepoForBranch(args, store)
     const localGitOptions = {

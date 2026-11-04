@@ -3,7 +3,7 @@
 import '@testing-library/jest-dom/vitest'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, cleanup, render, screen } from '@testing-library/react'
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import type {
   AgentStatusEntry,
   AgentStatusPayload
@@ -17,10 +17,13 @@ vi.mock('./use-native-chat-retained-session', () => ({
   useNativeChatRetainedSession: () => retained.session
 }))
 vi.mock('./NativeChatComposer', () => ({ NativeChatComposer: () => null }))
+const reviewRpc = vi.hoisted(() => vi.fn())
+vi.mock('@/runtime/runtime-rpc-client', () => ({ callRuntimeRpc: reviewRpc }))
 
 const { NativeChatResolvedView } = await import('./NativeChatResolvedView')
 const { TooltipProvider } = await import('@/components/ui/tooltip')
 const { useAppStore } = await import('../../store')
+const { useConversationReviewScope } = await import('./conversation-review-scope')
 const { installNativeChatMessageListTestViewport } =
   await import('./native-chat-message-list-test-viewport')
 
@@ -110,7 +113,7 @@ function patchStatus(fields: Partial<AgentStatusEntry>): void {
   }))
 }
 
-function renderPane(): void {
+function renderPane(focused = false): void {
   render(
     <TooltipProvider>
       <NativeChatResolvedView
@@ -119,7 +122,7 @@ function renderPane(): void {
         sessionId="session-state"
         transcriptPath={null}
         isVisible
-        isFocusedGroup={false}
+        isFocusedGroup={focused}
         targetPtyId="pty-state"
         terminalTabId="tab-state"
         ownsTabWideLaunchDraft={false}
@@ -135,6 +138,9 @@ function liveActivityLine(): Element | null {
 beforeEach(() => {
   restoreViewport = installNativeChatMessageListTestViewport()
   useAppStore.setState({ agentStatusByPaneKey: {}, nativeChatLaunchPromptByTabId: {} })
+  useAppStore.setState({ rightSidebarOpen: false })
+  useConversationReviewScope.setState({ active: null })
+  reviewRpc.mockReset()
 })
 
 afterEach(() => {
@@ -144,6 +150,55 @@ afterEach(() => {
 })
 
 describe('NativeChatResolvedView turn status', () => {
+  it('publishes all created terminal-chat PRs to the right sidebar from the resolved conversation', async () => {
+    const urls = [
+      'https://git.example.com/jiri/jiri/pulls/349',
+      'https://git.example.com/jinshuju/goldendata/pulls/272',
+      'https://git.example.com/jiri/jiri/pulls/356'
+    ]
+    const messages: NativeChatMessage[] = urls.flatMap((url, index) => [
+      {
+        id: String(index),
+        role: 'assistant',
+        source: 'transcript',
+        timestamp: index,
+        blocks: [
+          {
+            type: 'tool-call',
+            name: 'Bash',
+            callId: String(index),
+            input: { command: 'tea pulls create' }
+          },
+          { type: 'tool-result', callId: String(index), output: url }
+        ]
+      }
+    ])
+    retained.session = transcript('ready', false, messages)
+    reviewRpc.mockImplementation(async (_target, method, params) =>
+      method === 'nativeChat.readSession'
+        ? { messages, hasMore: false, beforeOffset: 0 }
+        : {
+            provider: 'gitea',
+            title: params.url,
+            url: params.url,
+            number: Number(params.url.split('/').at(-1)),
+            state: 'open',
+            status: 'success',
+            updatedAt: '',
+            mergeable: 'MERGEABLE'
+          }
+    )
+    useAppStore.setState({ rightSidebarOpen: true, rightSidebarTab: 'checks' })
+    renderPane(true)
+    await waitFor(() =>
+      expect(
+        useConversationReviewScope.getState().active?.rows.filter((row) => row.review)
+      ).toHaveLength(3)
+    )
+    expect(
+      useConversationReviewScope.getState().active?.rows.map((row) => row.review?.url)
+    ).toEqual(urls)
+  })
   it('counts the working turn from the host-stamped epoch, with the live line at the tail', () => {
     retained.session = transcript('working', false)
     setStatus({ state: 'working' }, 75_000)

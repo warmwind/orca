@@ -3,6 +3,7 @@ import type { HostedReviewForBranchArgs } from '../../shared/hosted-review'
 import type { PreloadApi } from '../api-types'
 
 export const hostedReviewApi = {
+  giteaDetails: (args: unknown) => ipcRenderer.invoke('hostedReview:giteaDetails', args),
   forBranch: (args: HostedReviewForBranchArgs) =>
     ipcRenderer.invoke('hostedReview:forBranch', args),
   getCreationEligibility: (args: unknown) =>

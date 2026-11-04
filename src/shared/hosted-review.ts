@@ -36,6 +36,7 @@ export type HostedReviewInfo = {
   url: string
   status: CheckStatus
   checksSummary?: ProviderCheckSummary
+  checksAvailable?: boolean
   updatedAt: string
   mergeable: PRMergeableState
   reviewDecision?: PRReviewDecision | null

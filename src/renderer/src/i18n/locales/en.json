@@ -20425,7 +20425,24 @@
         "scheduled": "Orca will continue this chat at {{time}}.",
         "cancel": "Don't continue"
       },
-      "settings": "Chat settings"
+      "settings": "Chat settings",
+      "relatedReviews": {
+        "title": "PRs changed in this conversation",
+        "details": "View details",
+        "detailsFor": "View details for {{title}}",
+        "created": "Created",
+        "updated": "Updated",
+        "loading": "Loading PR status…",
+        "checks": "Checks: {{status}}",
+        "unavailable": "PR status unavailable. Check the hosting service connection and refresh.",
+        "reading": "Reading earlier PR changes…",
+        "partial": "Could not read all conversation history. Refresh to try again.",
+        "empty": "No PR creation or update was detected in this conversation.",
+        "unknown": "Unavailable",
+        "noChecks": "No checks",
+        "lookupError": "Some PR updates could not be resolved. Check the hosting service connection and refresh.",
+        "open": "Open PR"
+      }
     },
     "tab": {
       "bar": {
@@ -23672,5 +23689,27 @@
   },
   "checks": {
     "rerunUnsuccessful": "Rerun unsuccessful"
+  },
+  "gitea": {
+    "review": {
+      "commentsUnavailable": "Some Gitea comments could not be loaded. Refresh to try again.",
+      "description": "Description",
+      "qunliCards": "Qunli cards",
+      "qunliCard": "Open card",
+      "loadFailed": "Could not load Gitea review details in this environment.",
+      "truncated": "This PR has more review history than can be displayed here. Open it on Gitea to see all entries.",
+      "checksUnavailable": "Gitea checks could not be loaded.",
+      "reviews": "Reviews",
+      "reviewsUnavailable": "Gitea reviews could not be loaded. Refresh to try again.",
+      "dismissed": "Dismissed",
+      "stale": "Outdated",
+      "openReview": "Open review on Gitea",
+      "noReviews": "No reviews yet.",
+      "approved": "Approved",
+      "changesRequested": "Changes requested",
+      "commented": "Commented",
+      "pending": "Pending",
+      "requested": "Review requested"
+    }
   }
 }

@@ -1,13 +1,67 @@
 import { defineMethod } from '../core'
+import { lookupGiteaConversationReview } from '../../../gitea/conversation-review-lookup'
+import { parseGiteaRepoRef } from '../../../gitea/repository-ref'
+import {
+  readGiteaReviewDetailsForRepo,
+  readGiteaReviewDetailsForUrl
+} from '../../../gitea/review-details'
 import { supportsHostedReviewCreation } from '../../../../shared/hosted-review-creation-providers'
 import { UNSUPPORTED_HOSTED_REVIEW_PROVIDER } from '../../../source-control/hosted-review-creation'
 import {
   HostedReviewCreate,
   HostedReviewCreationEligibility,
-  HostedReviewForBranch
+  HostedReviewForBranch,
+  HostedReviewConversationLookup,
+  GiteaReviewDetails
 } from '../../../../shared/rpc-contract/hosted-review-params'
 
 export const HOSTED_REVIEW_METHODS = [
+  defineMethod({
+    name: 'hostedReview.giteaDetails',
+    permission: 'workspace',
+    params: GiteaReviewDetails,
+    handler: async (params, { runtime }) =>
+      'url' in params
+        ? readGiteaReviewDetailsForUrl(
+            params.url,
+            runtime
+              .listRepos()
+              .flatMap((repo) => (repo.gitRemoteIdentity ? [repo.gitRemoteIdentity.remoteUrl] : []))
+          )
+        : readGiteaReviewDetailsForRepo(await runtime.showRepo(params.repo), params.number)
+  }),
+  defineMethod({
+    name: 'hostedReview.conversationLookup',
+    permission: 'workspace',
+    params: HostedReviewConversationLookup,
+    handler: async (params, { runtime }) => {
+      let lookup: Exclude<typeof params, { directory: string }>
+      if ('directory' in params) {
+        const references = await runtime
+          .listWorkspaceReferences(`path:${params.directory}`)
+          .catch(() => null)
+        if (!references?.worktree.repoId) {
+          return null
+        }
+        const repo = await runtime.showRepo(`id:${references.worktree.repoId}`)
+        const ref = repo.gitRemoteIdentity && parseGiteaRepoRef(repo.gitRemoteIdentity.remoteUrl)
+        if (!ref) {
+          return null
+        }
+        lookup = {
+          url: `${ref.webBaseUrl}/${encodeURIComponent(ref.owner)}/${encodeURIComponent(ref.repo)}/pulls/${params.number}`
+        }
+      } else {
+        lookup = params
+      }
+      return lookupGiteaConversationReview(
+        lookup,
+        runtime
+          .listRepos()
+          .flatMap((repo) => (repo.gitRemoteIdentity ? [repo.gitRemoteIdentity.remoteUrl] : []))
+      )
+    }
+  }),
   defineMethod({
     name: 'hostedReview.forBranch',
     permission: 'workspace',

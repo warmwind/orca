@@ -20,9 +20,52 @@ import { useChecksPanelBranchActions } from './checks-panel/use-checks-panel-bra
 import { useChecksPanelCreateReview } from './checks-panel/use-checks-panel-create-review'
 import { ChecksPanelEmptyContent } from './checks-panel/empty-content'
 import { ChecksPanelActiveContent } from './checks-panel/active-content'
+import { GiteaReviewContent } from './checks-panel/gitea-review-content'
+import { ConversationReviewsSidebar } from './checks-panel/ConversationReviewsSidebar'
+import { useConversationReviewScope } from '../native-chat/conversation-review-scope'
+import type { ChecksPanelContextState } from './checks-panel/use-checks-panel-context-state'
+import type { ChecksPanelControllerState } from './checks-panel/use-checks-panel-controller-state'
 export default function ChecksPanel(): React.JSX.Element {
+  const conversation = useConversationReviewScope((state) => state.active)
   const baseModel = useChecksPanelControllerState()
   const contextModel = Object.assign(baseModel, useChecksPanelContextState(baseModel))
+  if (conversation) {
+    return (
+      <ConversationReviewsSidebar
+        key={conversation.key}
+        scope={conversation}
+        visible={contextModel.isPanelVisible}
+      />
+    )
+  }
+  if (
+    contextModel.hostedReview?.provider === 'gitea' &&
+    contextModel.repo &&
+    contextModel.activeWorktree &&
+    !contextModel.isFolder
+  ) {
+    return (
+      <GiteaReviewContent
+        key={JSON.stringify([
+          contextModel.repo.executionHostId,
+          contextModel.repo.id,
+          contextModel.hostedReview.number
+        ])}
+        repo={contextModel.repo}
+        worktree={contextModel.activeWorktree}
+        review={contextModel.hostedReview}
+        visible={contextModel.isPanelVisible}
+      />
+    )
+  }
+  return <StandardChecksPanel contextModel={contextModel} />
+}
+
+function StandardChecksPanel({
+  contextModel
+}: {
+  contextModel: ChecksPanelContextState & ChecksPanelControllerState
+}): React.JSX.Element {
   const reviewModel = Object.assign(contextModel, useChecksPanelReviewState(contextModel))
   const generationModel = Object.assign(reviewModel, useChecksPanelGeneration(reviewModel))
   const composerModel = Object.assign(generationModel, useChecksPanelComposerState(generationModel))

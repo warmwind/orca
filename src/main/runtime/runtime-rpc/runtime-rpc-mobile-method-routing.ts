@@ -150,6 +150,8 @@ export const EXECUTION_HOST_METHODS = [
   'hostedReview.create',
   'hostedReview.createStacked',
   'hostedReview.forBranch',
+  'hostedReview.conversationLookup',
+  'hostedReview.giteaDetails',
   'hostedReview.getCreationEligibility',
   'linear.resolveCurrentIssue',
   'markdown.readTab',

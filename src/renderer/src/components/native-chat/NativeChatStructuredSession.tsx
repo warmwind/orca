@@ -57,6 +57,7 @@ import { structuredAgentLabel } from '@/lib/agent-session/launch/structured-agen
 import { useNativeChatStructuredComposerTransport } from './use-native-chat-structured-composer-transport'
 import { NativeChatStructuredComposerTabStrips } from './NativeChatStructuredComposerTabStrips'
 import { nativeChatPaneHeader } from './NativeChatPaneHeader'
+import { NativeChatStructuredReviews } from './NativeChatConversationReviews'
 import { structuredAgentSessionReadFailureNotice } from './structured-agent-session-read-failure-notice'
 import { useStructuredAgentSessionDeliveryNotices } from './use-structured-agent-session-delivery-notices'
 import { dispatchWasWithdrawn } from '../../../../shared/agent-session/requests/structured-agent-session-dispatch-rejection'
@@ -275,6 +276,7 @@ export function NativeChatStructuredSession(props: Omit<NativeChatStructuredView
       data-native-chat-scheme={appearanceStyle.colorScheme}
     >
       {nativeChatPaneHeader(props, ownerWorktreeId, appearanceStyle.colorScheme, handOff)}
+      <NativeChatStructuredReviews pane={props} journal={controller} />
       <NativeChatCrewFrame
         panel={<NativeChatCrewPanel {...props} composerRef={composerRef} canMention={canMention} />}
       >
@@ -304,7 +306,6 @@ export function NativeChatStructuredSession(props: Omit<NativeChatStructuredView
                     // A rewind or a /clear replaces the conversation; nothing the old one held carries over.
                     key={`${controller.epoch}:${controller.contextClear.clears}`}
                     ref={submits.messageListRef}
-                    session={session}
                     journalItems={controller.journalItems}
                     journalSubmissions={controller.submissions}
                     journalLatestTurn={controller.latestTurn}
@@ -321,7 +322,7 @@ export function NativeChatStructuredSession(props: Omit<NativeChatStructuredView
                     stopping={stopControls.stopping}
                     {...{ ...links, structuredAttachments: true }}
                     runtimeContext={imageRuntimeContext}
-                    deliveryNotices={deliveryNotices}
+                    {...{ session, deliveryNotices }}
                   />
                 </NativeChatClaudeSignInContext.Provider>
               </NativeChatUsageLimitActionsProvider>
@@ -392,7 +393,6 @@ export function NativeChatStructuredSession(props: Omit<NativeChatStructuredView
             <NativeChatComposer
               ref={composerRef}
               terminalTabId={props.tabId}
-              paneKey={paneKey}
               draftScopeKey={structuredAgentSessionDraftScopeKey(props.sessionId)}
               targetPtyId={null}
               agent={props.agent}
@@ -400,7 +400,7 @@ export function NativeChatStructuredSession(props: Omit<NativeChatStructuredView
               unavailableHint={install.unavailableHint}
               steerHead={stopControls.stopping ? undefined : submits.queuedMessages.steerHead}
               structuredTransport={transport}
-              notices={notices}
+              {...{ paneKey, notices }}
               recallSource={{ messages: session.messages, withoutImageMarkers: true }}
             />
           ) : null}
